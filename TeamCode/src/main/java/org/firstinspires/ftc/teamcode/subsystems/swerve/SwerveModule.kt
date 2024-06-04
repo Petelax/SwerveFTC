@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems.swerve
 
-import com.arcrobotics.ftclib.controller.PIDController
 import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward
 import com.arcrobotics.ftclib.geometry.Rotation2d
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveModuleState
@@ -11,6 +10,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.PwmControl
 import org.firstinspires.ftc.teamcode.constants.DrivebaseConstants
 import org.firstinspires.ftc.teamcode.subsystems.AbsoluteAnalogEncoder
+import org.firstinspires.ftc.teamcode.utils.PIDController
 
 class SwerveModule {
     private var motor: DcMotorEx
@@ -39,6 +39,7 @@ class SwerveModule {
         val c = DrivebaseConstants.ModuleCoefficients
         this.driveFeedForward = SimpleMotorFeedforward(c.KS, c.KV, c.KA)
         this.turnPID = PIDController(c.KP, c.KI, c.KD)
+        turnPID.enableContinuousInput(-Math.PI, Math.PI)
         initialize()
     }
 
@@ -63,6 +64,28 @@ class SwerveModule {
         motor.power = drivePower
     }
 
+    companion object {
+        /**
+         * Returns modulus of input.
+         *
+         * @param input Input value to wrap.
+         * @param minimumInput The minimum value expected from the input.
+         * @param maximumInput The maximum value expected from the input.
+         * @return The wrapped value.
+         */
+        fun inputModulus(input: Double, minimumInput: Double, maximumInput: Double): Double {
+            var output = input
+            val modulus = maximumInput - minimumInput
+
+            val numMax = ((input - minimumInput) / modulus)
+            output -= (numMax * modulus)
+
+            val numMin = ((input - maximumInput) / modulus)
+            output -= (numMin * modulus)
+
+            return output
+        }
+    }
 
 
 
