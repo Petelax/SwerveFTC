@@ -1,11 +1,16 @@
 package org.firstinspires.ftc.teamcode.subsystems.swerve
 
+import com.arcrobotics.ftclib.geometry.Rotation2d
 import com.arcrobotics.ftclib.geometry.Translation2d
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveDriveKinematics
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveModuleState
 import com.qualcomm.robotcore.hardware.HardwareMap
+import com.qualcomm.robotcore.hardware.IMU
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.constants.DrivebaseConstants
+import kotlin.math.atan2
+import kotlin.math.hypot
 
 class SwerveDrivetrain {
     private var lf: SwerveModule
@@ -18,6 +23,7 @@ class SwerveDrivetrain {
         DrivebaseConstants.Measurements.LR_POS,
         DrivebaseConstants.Measurements.RR_POS
     )
+    private var imu: IMU
 
     constructor(hardwareMap: HardwareMap) {
         val id = DrivebaseConstants.DeviceIDs
@@ -25,6 +31,11 @@ class SwerveDrivetrain {
         rf = SwerveModule(hardwareMap, id.RF_DRIVE_MOTOR, id.RF_TURN_MOTOR, id.RF_ENCODER)
         lr = SwerveModule(hardwareMap, id.LR_DRIVE_MOTOR, id.LR_TURN_MOTOR, id.LR_ENCODER)
         rr = SwerveModule(hardwareMap, id.RR_DRIVE_MOTOR, id.RR_TURN_MOTOR, id.RR_ENCODER)
+        imu = hardwareMap.get(IMU::class.java, "imu")
+    }
+
+    fun getHeading(): Double {
+        return imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS)
     }
 
     fun drive(speeds: ChassisSpeeds) {
@@ -32,7 +43,48 @@ class SwerveDrivetrain {
     }
 
     fun firstOrderDrive(speeds: ChassisSpeeds) {
-        
+        /* Define the robot velocities */
+        val vx = speeds.vxMetersPerSecond
+        val vy = speeds.vyMetersPerSecond
+        val vw = speeds.omegaRadiansPerSecond
+
+        /* Define array to store module states */
+        var moduleStates: Array<SwerveModuleState> = Array(4) { SwerveModuleState() }
+
+        /* Define the offsets from the center of the robot to each wheel */
+        val r = arrayOf(
+            arrayOf(0.13335, 0.13335), // LF
+            arrayOf(0.13335, -0.13335), // RF
+            arrayOf(-0.13335, 0.13335), // LR
+            arrayOf(-0.13335, -0.13335) // RR
+        )
+
+        for (i in moduleStates.indices) {
+            val vxModule = vx + vw * r[i][1]
+            val vyModule = vy + vw * r[i][0]
+            val moduleVelocity = hypot(vxModule, vyModule)
+            val moduleHeading = atan2(vyModule, vxModule)
+
+            moduleStates[i] = SwerveModuleState(moduleVelocity, Rotation2d(moduleHeading))
+
+        }
+
+        setModuleStates(moduleStates)
+    }
+
+    fun fieldCentricDrive(speeds: ChassisSpeeds) {
+        drive(ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond,
+            speeds.vyMetersPerSecond,
+            speeds.omegaRadiansPerSecond,
+            Rotation2d(getHeading())))
+    }
+
+    fun firstOrderFieldCentricDrive(speeds: ChassisSpeeds) {
+        firstOrderDrive(ChassisSpeeds.fromFieldRelativeSpeeds(
+            speeds.vxMetersPerSecond,
+            speeds.vyMetersPerSecond,
+            speeds.omegaRadiansPerSecond,
+            Rotation2d(getHeading())))
     }
 
     fun setModuleStates(moduleStates: Array<SwerveModuleState>) {
@@ -42,6 +94,5 @@ class SwerveDrivetrain {
         lr.setDesiredState(moduleStates[2])
         rr.setDesiredState(moduleStates[3])
     }
-
 
 }

@@ -79,29 +79,25 @@ class DrivebaseConstants {
 
     object Measurements {
         const val PI = 3.1415926535897932384626433832795028841971693993751058209
-        const val TRACK_WIDTH = 10.50
-        const val WHEEL_BASE = 10.50
-        const val WHEEL_RADIUS = 2.835/2.0
+        const val INCHES_TO_METERS = 0.0254
+        const val TRACK_WIDTH = 10.50 * INCHES_TO_METERS
+        const val WHEEL_BASE = 10.50 * INCHES_TO_METERS
+        const val WHEEL_RADIUS = 0.072
         const val TICKS_PER_REV = 8192
-        const val TICKS_TO_INCHES = (PI*2.0*WHEEL_RADIUS) / TICKS_PER_REV
-        const val MAX_VELOCITY = 3.8 /* meters per second */
-        const val MAX_ACCEL = 15.0 /* meters per second */
-        const val MAX_ANGULAR_VELOCITY = 16.0
-        const val CENTER_WHEEL_OFFSET = 0.0
-        private const val k = TRACK_WIDTH*0.0254/2
-        private const val j = WHEEL_BASE*0.0254/2
+        //const val TICKS_TO_INCHES = (PI*2.0*WHEEL_RADIUS) / TICKS_PER_REV
+        const val MAX_VELOCITY = 1.8 /* meters per second */
+        //const val MAX_ACCEL = 15.0 /* meters per second */
+        const val MAX_ANGULAR_VELOCITY = 13.5 /* rad per second */
+        //const val CENTER_WHEEL_OFFSET = 0.0
+        private const val k = TRACK_WIDTH/2
+        private const val j = WHEEL_BASE/2
 
-        const val MAX_VELOCITY_IN = 62.0 /* meters per second */
-        const val MAX_ANGULAR_VELOCITY_RAD = 10
+        //const val MAX_ANGULAR_VELOCITY_RAD = 10
 
-        const val MAX_ELEVATOR_HEIGHT = 2190
-        const val ELEVATOR_TICKS_PER_INCH = 81.1111
-        const val ELEVATOR_PPR = 384.5
-
-        val LF_POS = Translation2d(k/2, j/2)
-        val RF_POS = Translation2d(k/2, -j/2)
-        val LR_POS = Translation2d(-k/2, j/2)
-        val RR_POS = Translation2d(-k/2, -j/2)
+        val LF_POS = Translation2d(k, j)
+        val RF_POS = Translation2d(k, -j)
+        val LR_POS = Translation2d(-k, j)
+        val RR_POS = Translation2d(-k, -j)
 
         const val LF_OFFSET = -1.175
         const val RF_OFFSET = -0.23
