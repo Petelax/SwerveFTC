@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.subsystems.swerve
 
 import com.arcrobotics.ftclib.geometry.Translation2d
+import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveDriveKinematics
+import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveModuleState
 import com.qualcomm.robotcore.hardware.HardwareMap
 import org.firstinspires.ftc.teamcode.constants.DrivebaseConstants
 
@@ -25,6 +27,21 @@ class SwerveDrivetrain {
         rr = SwerveModule(hardwareMap, id.RR_DRIVE_MOTOR, id.RR_TURN_MOTOR, id.RR_ENCODER)
     }
 
+    fun drive(speeds: ChassisSpeeds) {
+        setModuleStates(kinematics.toSwerveModuleStates(speeds))
+    }
+
+    fun firstOrderDrive(speeds: ChassisSpeeds) {
+        
+    }
+
+    fun setModuleStates(moduleStates: Array<SwerveModuleState>) {
+        SwerveDriveKinematics.normalizeWheelSpeeds(moduleStates, DrivebaseConstants.Measurements.MAX_VELOCITY)
+        lf.setDesiredState(moduleStates[0])
+        rf.setDesiredState(moduleStates[1])
+        lr.setDesiredState(moduleStates[2])
+        rr.setDesiredState(moduleStates[3])
+    }
 
 
 }

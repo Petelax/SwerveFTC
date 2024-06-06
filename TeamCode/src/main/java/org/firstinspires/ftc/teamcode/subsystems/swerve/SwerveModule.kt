@@ -64,30 +64,4 @@ class SwerveModule {
         motor.power = drivePower
     }
 
-    companion object {
-        /**
-         * Returns modulus of input.
-         *
-         * @param input Input value to wrap.
-         * @param minimumInput The minimum value expected from the input.
-         * @param maximumInput The maximum value expected from the input.
-         * @return The wrapped value.
-         */
-        fun inputModulus(input: Double, minimumInput: Double, maximumInput: Double): Double {
-            var output = input
-            val modulus = maximumInput - minimumInput
-
-            val numMax = ((input - minimumInput) / modulus)
-            output -= (numMax * modulus)
-
-            val numMin = ((input - maximumInput) / modulus)
-            output -= (numMin * modulus)
-
-            return output
-        }
-    }
-
-
-
-
 }
