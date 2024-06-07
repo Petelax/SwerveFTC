@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystems.swerve
 
 import com.arcrobotics.ftclib.geometry.Rotation2d
-import com.arcrobotics.ftclib.geometry.Translation2d
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveDriveKinematics
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveModuleState
@@ -27,16 +26,17 @@ class SwerveDrivetrain {
 
     constructor(hardwareMap: HardwareMap) {
         val id = DrivebaseConstants.DeviceIDs
-        lf = SwerveModule(hardwareMap, id.LF_DRIVE_MOTOR, id.LF_TURN_MOTOR, id.LF_ENCODER)
-        rf = SwerveModule(hardwareMap, id.RF_DRIVE_MOTOR, id.RF_TURN_MOTOR, id.RF_ENCODER)
-        lr = SwerveModule(hardwareMap, id.LR_DRIVE_MOTOR, id.LR_TURN_MOTOR, id.LR_ENCODER)
-        rr = SwerveModule(hardwareMap, id.RR_DRIVE_MOTOR, id.RR_TURN_MOTOR, id.RR_ENCODER)
+        lf = SwerveModule(hardwareMap, id.LF_DRIVE_MOTOR, id.LF_TURN_MOTOR, id.LF_ENCODER, DrivebaseConstants.Measurements.LF_OFFSET)
+        rf = SwerveModule(hardwareMap, id.RF_DRIVE_MOTOR, id.RF_TURN_MOTOR, id.RF_ENCODER, DrivebaseConstants.Measurements.RF_OFFSET)
+        lr = SwerveModule(hardwareMap, id.LR_DRIVE_MOTOR, id.LR_TURN_MOTOR, id.LR_ENCODER, DrivebaseConstants.Measurements.LR_OFFSET)
+        rr = SwerveModule(hardwareMap, id.RR_DRIVE_MOTOR, id.RR_TURN_MOTOR, id.RR_ENCODER, DrivebaseConstants.Measurements.RR_OFFSET)
         imu = hardwareMap.get(IMU::class.java, "imu")
     }
 
     fun getHeading(): Double {
         return imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS)
     }
+
 
     fun drive(speeds: ChassisSpeeds) {
         setModuleStates(kinematics.toSwerveModuleStates(speeds))
@@ -93,6 +93,22 @@ class SwerveDrivetrain {
         rf.setDesiredState(moduleStates[1])
         lr.setDesiredState(moduleStates[2])
         rr.setDesiredState(moduleStates[3])
+    }
+
+    fun getModuleHeadings(): Array<Double> {
+        return arrayOf(lf.getHeading(), rf.getHeading(), lr.getHeading(), rr.getHeading())
+    }
+
+    fun getDesiredModuleStates(): Array<SwerveModuleState> {
+        return arrayOf(lf.getDesiredState(), rf.getDesiredState(), lr.getDesiredState(), rr.getDesiredState())
+
+    }
+
+    fun test(drive: Double, steer: Double) {
+        lf.spin(drive, steer)
+        rf.spin(drive, steer)
+        lr.spin(drive, steer)
+        rr.spin(drive, steer)
     }
 
 }

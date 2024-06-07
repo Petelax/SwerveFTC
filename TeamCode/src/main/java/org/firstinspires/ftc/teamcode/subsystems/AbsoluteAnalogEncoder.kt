@@ -5,10 +5,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap
 
 class AbsoluteAnalogEncoder {
     private var encoder: AnalogInput
-    private var offset = 0
+    private var offset = 0.0
     private val range = 3.3
-    constructor(hardwareMap: HardwareMap, name: String) {
+    constructor(hardwareMap: HardwareMap, name: String, offset: Double) {
         this.encoder = hardwareMap.get(AnalogInput::class.java, name)
+        this.offset = offset
     }
 
     constructor(encoder: AnalogInput) {
@@ -16,11 +17,11 @@ class AbsoluteAnalogEncoder {
     }
 
 
-    public fun getHeading(): Double {
-        return (((getVoltage()/range) * Math.PI*2) - offset)%(2*Math.PI)
+    fun getHeading(): Double {
+        return (((getVoltage() + offset) / range) * Math.PI*2)%(2*Math.PI)
     }
 
-    public fun getVoltage(): Double {
+    fun getVoltage(): Double {
         return encoder.voltage
     }
 

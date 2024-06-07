@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.constants
 
+import com.acmerobotics.dashboard.config.Config
 import com.arcrobotics.ftclib.geometry.Translation2d
 
 class DrivebaseConstants {
@@ -67,14 +68,15 @@ class DrivebaseConstants {
 
     }
 
+    @Config
     object ModuleCoefficients {
-        const val KS = 0.0
-        const val KV = 0.0
-        const val KA = 0.0
+        @JvmField var KS = 0.0
+        @JvmField var KV = 8.0
+        @JvmField var KA = 0.0
 
-        const val KP = 0.01
-        const val KI = 0.0
-        const val KD = 0.0
+        @JvmField var KP = 0.5
+        @JvmField var KI = 0.0
+        @JvmField var KD = 0.0
     }
 
     object Measurements {
