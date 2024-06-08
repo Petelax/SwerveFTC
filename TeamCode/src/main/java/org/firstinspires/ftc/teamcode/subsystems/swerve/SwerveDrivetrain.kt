@@ -4,6 +4,8 @@ import com.arcrobotics.ftclib.geometry.Rotation2d
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveDriveKinematics
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveModuleState
+import com.outoftheboxrobotics.photoncore.PeriodicSupplier
+import com.outoftheboxrobotics.photoncore.Photon
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.IMU
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
@@ -11,6 +13,7 @@ import org.firstinspires.ftc.teamcode.constants.DrivebaseConstants
 import kotlin.math.atan2
 import kotlin.math.hypot
 
+@Photon
 class SwerveDrivetrain {
     private var lf: SwerveModule
     private var rf: SwerveModule
@@ -102,6 +105,10 @@ class SwerveDrivetrain {
     fun getDesiredModuleStates(): Array<SwerveModuleState> {
         return arrayOf(lf.getDesiredState(), rf.getDesiredState(), lr.getDesiredState(), rr.getDesiredState())
 
+    }
+
+    fun getAThing(): Array<Double> {
+        return arrayOf(lf.getThing(), rf.getThing(), lr.getThing(), rr.getThing())
     }
 
     fun test(drive: Double, steer: Double) {

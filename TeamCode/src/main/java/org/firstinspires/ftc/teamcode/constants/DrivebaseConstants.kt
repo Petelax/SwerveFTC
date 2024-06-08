@@ -101,10 +101,10 @@ class DrivebaseConstants {
         val LR_POS = Translation2d(-k, j)
         val RR_POS = Translation2d(-k, -j)
 
-        const val LF_OFFSET = -1.175
-        const val RF_OFFSET = -0.23
-        const val LR_OFFSET = -0.98
-        const val RR_OFFSET = -1.85
+        const val LF_OFFSET = 1.983
+        const val RF_OFFSET = 0.297
+        const val LR_OFFSET = 3.337
+        const val RR_OFFSET = 2.055
 
 
     }

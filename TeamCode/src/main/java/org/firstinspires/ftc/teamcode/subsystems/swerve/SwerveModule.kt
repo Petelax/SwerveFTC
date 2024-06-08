@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.subsystems.swerve
 import com.arcrobotics.ftclib.controller.wpilibcontroller.SimpleMotorFeedforward
 import com.arcrobotics.ftclib.geometry.Rotation2d
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.SwerveModuleState
+import com.outoftheboxrobotics.photoncore.Photon
 import com.qualcomm.robotcore.hardware.CRServoImplEx
 import com.qualcomm.robotcore.hardware.DcMotor
 import com.qualcomm.robotcore.hardware.DcMotorEx
@@ -22,6 +23,11 @@ class SwerveModule {
     private var desiredState: SwerveModuleState
     private var driveFeedForward: SimpleMotorFeedforward
     private var turnPID: PIDController
+    private var turnPower = 0.0
+    private var lastTurnPower = 0.0
+    private var drivePower = 0.0
+    private var lastDrivePower = 0.0
+    private var delta = Rotation2d()
 
     /**
      * @param hardwareMap hardwareMap
@@ -61,6 +67,9 @@ class SwerveModule {
         turnPID.enableContinuousInput(0.0, 2.0*Math.PI)
     }
 
+    /**
+     * @return radians
+     */
     fun getHeading(): Double {
         return encoder.getHeading()
     }
@@ -71,15 +80,34 @@ class SwerveModule {
 
     fun setDesiredState(state: SwerveModuleState) {
         desiredState = SwerveModuleState.optimize(state, Rotation2d(getHeading()))
+        // desiredState = state
+        delta = state.angle.minus(Rotation2d(getHeading()))
 
-        val drivePower = driveFeedForward.calculate(desiredState.speedMetersPerSecond) / 12.0
-        var turnPower = turnPID.calculate(getHeading(), state.angle.radians)
+        if (abs(state.angle.radians - getHeading()) > Math.PI/2) {
+            
+        }
+
+        drivePower = driveFeedForward.calculate(desiredState.speedMetersPerSecond) / 12.0
+        turnPower = turnPID.calculate(getHeading(), desiredState.angle.radians)
 
         //(Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power)
         turnPower += if (abs(turnPID.positionError) > 0.02) 0.03 else 0.0 * sign(turnPower)
 
-        servo.power = turnPower
-        motor.power = drivePower
+        write()
+
+    }
+
+    fun write() {
+        if (abs(turnPower - lastTurnPower) > 0.02) {
+            servo.power = turnPower
+            lastTurnPower = turnPower
+        }
+
+        if (abs(lastDrivePower - drivePower) > 0.02) {
+            motor.power = drivePower
+            lastDrivePower = drivePower
+        }
+
     }
 
     /**
@@ -90,6 +118,10 @@ class SwerveModule {
     fun spin(drive: Double, steer: Double) {
         motor.power = drive
         servo.power = steer
+    }
+
+    fun getThing(): Double {
+        return delta.degrees
     }
 
 }

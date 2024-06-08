@@ -18,7 +18,7 @@ class AbsoluteAnalogEncoder {
 
 
     fun getHeading(): Double {
-        return (((getVoltage() + offset) / range) * Math.PI*2)%(2*Math.PI)
+        return ((((getVoltage()) / range) * Math.PI*2) - offset).mod(2*Math.PI)
     }
 
     fun getVoltage(): Double {
