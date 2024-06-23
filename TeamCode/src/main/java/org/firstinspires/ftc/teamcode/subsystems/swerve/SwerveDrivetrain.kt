@@ -54,7 +54,9 @@ class SwerveDrivetrain {
 
 
     fun drive(speeds: ChassisSpeeds) {
+        //if (hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond) >= 0.01 || speeds.omegaRadiansPerSecond >= 0.01) {
         setModuleStates(kinematics.toSwerveModuleStates(speeds))
+        //}
     }
 
     fun firstOrderDrive(speeds: ChassisSpeeds) {

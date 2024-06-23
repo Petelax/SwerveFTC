@@ -111,7 +111,11 @@ class SwerveModule {
     }
 
     fun write() {
-        if (abs(turnPower - lastTurnPower) > 0.02) {
+        if (drivePower < 0.0001) {
+            turnPower = 0.0
+        }
+
+        if (abs(turnPower - lastTurnPower) > 0.005) {
             servo.power = turnPower
             lastTurnPower = turnPower
         }
