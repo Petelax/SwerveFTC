@@ -8,10 +8,14 @@ import com.outoftheboxrobotics.photoncore.PeriodicSupplier
 import com.outoftheboxrobotics.photoncore.Photon
 import com.qualcomm.robotcore.hardware.HardwareMap
 import com.qualcomm.robotcore.hardware.IMU
+import org.ejml.simple.SimpleMatrix
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit
 import org.firstinspires.ftc.teamcode.constants.DrivebaseConstants
 import kotlin.math.atan2
+import kotlin.math.cos
 import kotlin.math.hypot
+import kotlin.math.pow
+import kotlin.math.sin
 
 @Photon
 class SwerveDrivetrain {
@@ -26,6 +30,14 @@ class SwerveDrivetrain {
         DrivebaseConstants.Measurements.RR_POS
     )
     private var imu: IMU
+
+    /* Define the offsets from the center of the robot to each wheel */
+    private val r = arrayOf(
+        arrayOf(0.13335, 0.13335), // LF
+        arrayOf(0.13335, -0.13335), // RF
+        arrayOf(-0.13335, 0.13335), // LR
+        arrayOf(-0.13335, -0.13335) // RR
+    )
 
     constructor(hardwareMap: HardwareMap) {
         val id = DrivebaseConstants.DeviceIDs
@@ -46,6 +58,11 @@ class SwerveDrivetrain {
     }
 
     fun firstOrderDrive(speeds: ChassisSpeeds) {
+        val moduleStates = firstOrderInverse(speeds)
+        setModuleStates(moduleStates)
+    }
+
+    fun firstOrderInverse(speeds: ChassisSpeeds): Array<SwerveModuleState> {
         /* Define the robot velocities */
         val vx = speeds.vxMetersPerSecond
         val vy = speeds.vyMetersPerSecond
@@ -54,13 +71,6 @@ class SwerveDrivetrain {
         /* Define array to store module states */
         var moduleStates: Array<SwerveModuleState> = Array(4) { SwerveModuleState() }
 
-        /* Define the offsets from the center of the robot to each wheel */
-        val r = arrayOf(
-            arrayOf(0.13335, 0.13335), // LF
-            arrayOf(0.13335, -0.13335), // RF
-            arrayOf(-0.13335, 0.13335), // LR
-            arrayOf(-0.13335, -0.13335) // RR
-        )
 
         for (i in moduleStates.indices) {
             val vxModule = vx + vw * r[i][1]
@@ -72,8 +82,52 @@ class SwerveDrivetrain {
 
         }
 
-        setModuleStates(moduleStates)
+        return moduleStates
     }
+
+    fun secondOrderInverse(speeds: ChassisSpeeds, accels: ChassisSpeeds): Array<SwerveModule.SwerveModuleStateAccel> {
+        var moduleStates: Array<SwerveModule.SwerveModuleStateAccel> = Array(4) { SwerveModule.SwerveModuleStateAccel() }
+        for (i in moduleStates.indices) {
+            val m = SimpleMatrix(
+                arrayOf(
+                    doubleArrayOf(1.0, 0.0, -r[i][0], -r[i][1]),
+                    doubleArrayOf(0.0, 1.0, -r[i][1], r[i][0])
+                )
+            )
+            val input = SimpleMatrix(
+                arrayOf(
+                    doubleArrayOf(
+                        accels.vxMetersPerSecond, accels.vyMetersPerSecond,
+                        speeds.omegaRadiansPerSecond.pow(2.0), accels.omegaRadiansPerSecond
+                    )
+                )
+            )
+            val moduleAccels = m.mult(input)
+
+            val vxModule = speeds.vxMetersPerSecond + speeds.omegaRadiansPerSecond * r[0][1]
+            val vyModule = speeds.vyMetersPerSecond + speeds.omegaRadiansPerSecond * r[0][0]
+            val moduleVelocity = hypot(vxModule, vyModule)
+            val moduleHeading = atan2(vyModule, vxModule)
+
+            val m2 = SimpleMatrix(
+                arrayOf(
+                    doubleArrayOf(cos(moduleHeading), sin(moduleHeading)),
+                    doubleArrayOf(-sin(moduleHeading), cos(moduleHeading))
+                )
+            )
+            val final = m2.mult(moduleAccels)
+
+            moduleStates[i] = SwerveModule.SwerveModuleStateAccel(moduleVelocity, moduleHeading, final[0], final[1])
+        }
+
+        return moduleStates
+    }
+
+    fun secondOrderDrive(speeds: ChassisSpeeds, accels: ChassisSpeeds) {
+        val moduleStates = secondOrderInverse(speeds, accels)
+        setModuleStatesAccel(moduleStates)
+    }
+
 
     fun fieldCentricDrive(speeds: ChassisSpeeds) {
         drive(ChassisSpeeds.fromFieldRelativeSpeeds(speeds.vxMetersPerSecond,
@@ -96,6 +150,14 @@ class SwerveDrivetrain {
         rf.setDesiredState(moduleStates[1])
         lr.setDesiredState(moduleStates[2])
         rr.setDesiredState(moduleStates[3])
+    }
+
+    fun setModuleStatesAccel(moduleStates: Array<SwerveModule.SwerveModuleStateAccel>) {
+        // SwerveDriveKinematics.normalizeWheelSpeeds(moduleStates, DrivebaseConstants.Measurements.MAX_VELOCITY)
+        lf.setDesiredStateAccel(moduleStates[0])
+        rf.setDesiredStateAccel(moduleStates[1])
+        lr.setDesiredStateAccel(moduleStates[2])
+        rr.setDesiredStateAccel(moduleStates[3])
     }
 
     fun getModuleHeadings(): Array<Double> {
