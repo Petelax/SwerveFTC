@@ -21,7 +21,7 @@ class OdoTest: OpMode() {
     private lateinit var elapsedtime: ElapsedTime
     private lateinit var drive: SwerveDrivetrain
     private lateinit var gamepad: GamepadEx
-    private lateinit var odo: SparkFunOTOS
+    //private lateinit var odo: SparkFunOTOS
 
     override fun init() {
         elapsedtime = ElapsedTime()
@@ -35,8 +35,8 @@ class OdoTest: OpMode() {
 
         drive = SwerveDrivetrain(hardwareMap)
 
-        odo = hardwareMap.get(SparkFunOTOS::class.java, "otos")
-        configureOtos()
+        //odo = hardwareMap.get(SparkFunOTOS::class.java, "otos")
+        //configureOtos()
 
         gamepad = GamepadEx(gamepad1)
 
@@ -60,11 +60,11 @@ class OdoTest: OpMode() {
         val states = drive.getDesiredModuleStates()
         //val gyro = drive.getHeading()
 
-        val pos: Pose2D = odo.getPosition()
-        telemetry.addData("thing", drive.getAThing()[0])
-        telemetry.addData("heading", pos.h)
-        telemetry.addData("x", pos.x)
-        telemetry.addData("y", pos.y)
+        //val pos: Pose2D = odo.getPosition()
+        //telemetry.addData("thing", drive.getAThing()[0])
+        //telemetry.addData("heading", pos.h)
+        //telemetry.addData("x", pos.x)
+        //telemetry.addData("y", pos.y)
         telemetry.addData("lf heading", headings[0])
         telemetry.addData("lf desired heading", states[0].angle.radians)
         telemetry.addData("rf heading", headings[1])
@@ -77,6 +77,7 @@ class OdoTest: OpMode() {
         telemetry.addData("ms", elapsedtime.milliseconds())
         elapsedtime.reset()
     }
+    /*
     private fun configureOtos() {
         telemetry.addLine("Configuring OTOS...")
         telemetry.update()
@@ -169,4 +170,6 @@ class OdoTest: OpMode() {
         )
         telemetry.update()
     }
+
+     */
 }

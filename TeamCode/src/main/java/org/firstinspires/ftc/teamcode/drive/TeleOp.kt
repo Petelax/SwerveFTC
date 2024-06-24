@@ -49,6 +49,11 @@ class TeleOp: OpMode() {
             gamepad.rightX*DrivebaseConstants.Measurements.MAX_ANGULAR_VELOCITY
         ))
 
+        val pose = drive.getPose()
+        telemetry.addData("x", pose.x)
+        telemetry.addData("x", pose.y)
+        telemetry.addData("x", pose.rotation.degrees)
+
         //drive.test(gamepad.leftY, gamepad.rightX)
         val headings = drive.getModuleHeadings()
         val states = drive.getDesiredModuleStates()
