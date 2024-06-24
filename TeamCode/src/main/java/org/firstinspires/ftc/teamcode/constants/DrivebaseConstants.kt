@@ -88,6 +88,7 @@ class DrivebaseConstants {
         const val TICKS_PER_REV = 8192
         //const val TICKS_TO_INCHES = (PI*2.0*WHEEL_RADIUS) / TICKS_PER_REV
         const val MAX_VELOCITY = 1.8 /* meters per second */
+        const val MAX_ACCELERATION = 3.6
         //const val MAX_ACCEL = 15.0 /* meters per second */
         const val MAX_ANGULAR_VELOCITY = 13.5 /* rad per second */
         //const val CENTER_WHEEL_OFFSET = 0.0

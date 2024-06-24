@@ -83,14 +83,27 @@ class SwerveModule {
         // desiredState = state
         delta = state.angle.minus(Rotation2d(getHeading()))
 
-        if (abs(state.angle.radians - getHeading()) > Math.PI/2) {
-            
-        }
-
         drivePower = driveFeedForward.calculate(desiredState.speedMetersPerSecond) / 12.0
         turnPower = turnPID.calculate(getHeading(), desiredState.angle.radians)
 
         //(Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power)
+        turnPower += if (abs(turnPID.positionError) > 0.02) 0.03 else 0.0 * sign(turnPower)
+
+        write()
+
+    }
+
+    fun setDesiredStateAccel(state: SwerveModuleStateAccel) {
+        val delta = state.w - getHeading()
+        var desiredState = state
+        var flip = 1.0
+        if (abs(delta) > Math.PI/2) {
+            desiredState.w = Rotation2d(state.w).rotateBy(Rotation2d(2*Math.PI)).radians
+            flip = -1.0
+        }
+
+        drivePower = flip * (driveFeedForward.calculate(desiredState.v, desiredState.a) / 12.0)
+        turnPower = turnPID.calculate(getHeading(), desiredState.w)
         turnPower += if (abs(turnPID.positionError) > 0.02) 0.03 else 0.0 * sign(turnPower)
 
         write()
@@ -126,6 +139,37 @@ class SwerveModule {
 
     fun getThing(): Double {
         return delta.degrees
+    }
+
+    class SwerveModuleStateAccel {
+        constructor() {}
+
+        constructor(v: Double, w:Double, a: Double, vw: Double) {
+            this.v = v
+            this.w = w
+            this.a = a
+            this.vw = vw
+        }
+        /**
+         * linear velocity m/s
+         */
+        var v: Double = 0.0
+
+        /**
+         * angle in radians
+         */
+        var w: Double = 0.0
+
+        /**
+         * linear accel in m/s^2
+         */
+        var a: Double = 0.0
+
+        /**
+         * angular velocity in radians/s
+         */
+        var vw: Double = 0.0
+
     }
 
 }
