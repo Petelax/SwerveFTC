@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.constants.DrivebaseConstants
 import org.firstinspires.ftc.teamcode.subsystems.AbsoluteAnalogEncoder
 import org.firstinspires.ftc.teamcode.utils.PIDController
 import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.sign
 
 class SwerveModule {
@@ -83,12 +84,14 @@ class SwerveModule {
         // desiredState = state
         delta = state.angle.minus(Rotation2d(getHeading()))
 
-        drivePower = driveFeedForward.calculate(desiredState.speedMetersPerSecond) / 12.0
+        drivePower = driveFeedForward.calculate(desiredState.speedMetersPerSecond) / 12.0 * abs(delta.cos)
         turnPower = turnPID.calculate(getHeading(), desiredState.angle.radians)
 
         //(Math.abs(error) > 0.02 ? K_STATIC : 0) * Math.signum(power)
         turnPower += if (abs(turnPID.positionError) > 0.02) 0.03 else 0.0 * sign(turnPower)
 
+        //servo.power = turnPower
+        //motor.power = drivePower
         write()
 
     }
@@ -111,19 +114,22 @@ class SwerveModule {
     }
 
     fun write() {
-        if (drivePower < 0.0001) {
+        if (abs(drivePower) < 0.0001) {
             turnPower = 0.0
         }
 
-        if (abs(turnPower - lastTurnPower) > 0.005) {
-            servo.power = turnPower
-            lastTurnPower = turnPower
-        }
+        servo.power = turnPower
+        motor.power = drivePower
 
-        if (abs(lastDrivePower - drivePower) > 0.02) {
-            motor.power = drivePower
-            lastDrivePower = drivePower
-        }
+//        if (abs(turnPower - lastTurnPower) > 0.005) {
+//            servo.power = turnPower
+//            lastTurnPower = turnPower
+//        }
+//
+//        if (abs(lastDrivePower - drivePower) > 0.02) {
+//            motor.power = drivePower
+//            lastDrivePower = drivePower
+//        }
 
     }
 

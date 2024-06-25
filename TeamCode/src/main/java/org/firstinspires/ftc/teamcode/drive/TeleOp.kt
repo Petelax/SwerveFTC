@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.drive
 import com.acmerobotics.dashboard.FtcDashboard
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry
 import com.arcrobotics.ftclib.gamepad.GamepadEx
+import com.arcrobotics.ftclib.gamepad.GamepadKeys
 import com.arcrobotics.ftclib.kinematics.wpilibkinematics.ChassisSpeeds
 import com.outoftheboxrobotics.photoncore.Photon
 import com.qualcomm.hardware.lynx.LynxModule
@@ -12,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx
 import com.qualcomm.robotcore.util.ElapsedTime
 import org.firstinspires.ftc.teamcode.constants.DrivebaseConstants
 import org.firstinspires.ftc.teamcode.subsystems.swerve.SwerveDrivetrain
+import kotlin.math.pow
 
 @Photon
 @TeleOp
@@ -43,16 +45,20 @@ class TeleOp: OpMode() {
             hub.clearBulkCache()
         }
 
-        drive.drive(ChassisSpeeds(
-            gamepad.leftX*DrivebaseConstants.Measurements.MAX_VELOCITY,
-            gamepad.leftY*DrivebaseConstants.Measurements.MAX_VELOCITY,
-            gamepad.rightX*DrivebaseConstants.Measurements.MAX_ANGULAR_VELOCITY
+        drive.firstOrderFieldCentricDrive(ChassisSpeeds(
+            gamepad.leftY.pow(1) *DrivebaseConstants.Measurements.MAX_VELOCITY,
+            -gamepad.leftX.pow(1)*DrivebaseConstants.Measurements.MAX_VELOCITY,
+            -gamepad.rightX.pow(1)*DrivebaseConstants.Measurements.MAX_ANGULAR_VELOCITY
         ))
 
         val pose = drive.getPose()
         telemetry.addData("x", pose.x)
-        telemetry.addData("x", pose.y)
-        telemetry.addData("x", pose.rotation.degrees)
+        telemetry.addData("y", pose.y)
+        telemetry.addData("heading", pose.rotation.degrees)
+
+        if(gamepad.wasJustPressed(GamepadKeys.Button.A)) {
+            drive.resetHeading()
+        }
 
         //drive.test(gamepad.leftY, gamepad.rightX)
         val headings = drive.getModuleHeadings()

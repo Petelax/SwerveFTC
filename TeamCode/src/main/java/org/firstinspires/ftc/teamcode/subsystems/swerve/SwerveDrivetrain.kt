@@ -36,10 +36,10 @@ class SwerveDrivetrain {
 
     /* Define the offsets from the center of the robot to each wheel */
     private val r = arrayOf(
-        arrayOf(0.13335, 0.13335), // LF
         arrayOf(0.13335, -0.13335), // RF
+        arrayOf(0.13335, 0.13335), // LF
+        arrayOf(-0.13335, -0.13335), // RR
         arrayOf(-0.13335, 0.13335), // LR
-        arrayOf(-0.13335, -0.13335) // RR
     )
 
     constructor(hardwareMap: HardwareMap) {
@@ -56,6 +56,11 @@ class SwerveDrivetrain {
     fun getHeading(): Double {
         return getPose().rotation.radians
         //return imu.robotYawPitchRollAngles.getYaw(AngleUnit.RADIANS)
+    }
+
+    fun resetHeading() {
+        val currentPose = getPose()
+        odo.position = SparkFunOTOS.Pose2D(currentPose.x, currentPose.y, 0.0)
     }
 
     fun getPose(): Pose2d {
@@ -83,7 +88,6 @@ class SwerveDrivetrain {
 
         /* Define array to store module states */
         var moduleStates: Array<SwerveModuleState> = Array(4) { SwerveModuleState() }
-
 
         for (i in moduleStates.indices) {
             val vxModule = vx + vw * r[i][1]
